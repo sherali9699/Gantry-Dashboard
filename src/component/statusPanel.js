@@ -1,13 +1,55 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getStatus } from "../services/robotApi";
 
 function SystemStatusPanel(){
 
-  const status = {
-    arduino: "Connected",
-    motors: "Ready",
-    limitSwitch: "OK",
+  const [status, setStatus] = useState({
+    arduino: "Connecting...",
+    motors: "Unknown",
+    limitSwitch: "Unknown",
     jobQueue: "Idle"
-  };
+  });
+
+  useEffect(() => {
+
+    const fetchStatus = async () => {
+
+      try{
+
+        const response = await getStatus();
+
+        // Example response parsing
+        const data = response.data;
+
+        setStatus({
+          arduino: "Connected",
+          motors: "Ready",
+          limitSwitch: "OK",
+          jobQueue: "Idle"
+        });
+
+      } catch(error){
+
+        console.error("Status fetch failed:", error);
+
+        setStatus({
+          arduino: "Disconnected",
+          motors: "Offline",
+          limitSwitch: "Unknown",
+          jobQueue: "Stopped"
+        });
+
+      }
+
+    };
+
+    fetchStatus();
+
+    const interval = setInterval(fetchStatus, 1000);
+
+    return () => clearInterval(interval);
+
+  }, []);
 
   return(
 
@@ -88,3 +130,100 @@ function SystemStatusPanel(){
 }
 
 export default SystemStatusPanel;
+
+
+
+
+
+
+
+// import React from "react";
+
+// function SystemStatusPanel(){
+
+//   const status = {
+//     arduino: "Connected",
+//     motors: "Ready",
+//     limitSwitch: "OK",
+//     jobQueue: "Idle"
+//   };
+
+//   return(
+
+//     <div className="panel">
+
+//       <div className="section-title">
+//         System Status
+//       </div>
+
+//       <div className="row status-row">
+
+//         <div className="col-6 status-label">
+//           Arduino
+//         </div>
+
+//         <div className="col-6 status-value">
+
+//           <span className="status-dot status-green"></span>
+
+//           {status.arduino}
+
+//         </div>
+
+//       </div>
+
+//       <div className="row status-row">
+
+//         <div className="col-6 status-label">
+//           Motors
+//         </div>
+
+//         <div className="col-6 status-value">
+
+//           <span className="status-dot status-green"></span>
+
+//           {status.motors}
+
+//         </div>
+
+//       </div>
+
+//       <div className="row status-row">
+
+//         <div className="col-6 status-label">
+//           Limit Switch
+//         </div>
+
+//         <div className="col-6 status-value">
+
+//           <span className="status-dot status-green"></span>
+
+//           {status.limitSwitch}
+
+//         </div>
+
+//       </div>
+
+//       <div className="row">
+
+//         <div className="col-6 status-label">
+//           Job Queue
+//         </div>
+
+//         <div className="col-6 status-value">
+
+//           <span className="status-dot status-blue"></span>
+
+//           {status.jobQueue}
+
+//         </div>
+
+//       </div>
+
+//     </div>
+
+//   );
+
+// }
+
+// export default SystemStatusPanel;
